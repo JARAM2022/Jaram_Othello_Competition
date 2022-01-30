@@ -1,0 +1,54 @@
+{
+  "editor.tabSize": 2,
+  "editor.fontSize": 14,
+  "editor.suggestSelection": "first",
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.insertSpaces": true,
+  "editor.fontFamily": "'D2Coding', Consolas",
+  "files.exclude": {
+    ".git/": true,
+    "node_modules/": true
+  },
+  "search.exclude": {
+    ".git/": true
+  },
+  "code-runner.executorMap": {
+    "c": "clear && $workspaceRoot/psm.sh -t $fileNameWithoutExt",
+    "cpp": "clear && $workspaceRoot/psm.sh -t $fileNameWithoutExt"
+  },
+  "code-runner.executorMapByGlob": {},
+  "code-runner.executorMapByFileExtension": {},
+  "code-runner.customCommand": "clear && $workspaceRoot/psm.sh -v -t $fileNameWithoutExt",
+  "code-runner.clearPreviousOutput": true,
+  "code-runner.showExecutionMessage": true,
+  "code-runner.preserveFocus": true,
+  "code-runner.runInTerminal": true,
+  "terminal.explorerKind": "integrated",
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.defaultProfile.windows": "Command Prompt",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell"
+    },
+    "Command Prompt": {
+      "path": [
+        "${env:windir}\\Sysnative\\cmd.exe",
+        "${env:windir}\\System32\\cmd.exe"
+      ],
+      "args": [],
+      "icon": "terminal-cmd"
+    },
+    "Git Bash": {
+      "source": "Git Bash"
+    }
+  },
+  "breadcrumbs.enabled": true,
+  "prettier.jsxBracketSameLine": true,
+  "editor.bracketPairColorization.enabled": true,
+  "C_Cpp.vcFormat.newLine.closeBraceSameLine.emptyFunction": true,
+  "C_Cpp.vcFormat.newLine.closeBraceSameLine.emptyType": true,
+  "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 0 }",
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
+}
