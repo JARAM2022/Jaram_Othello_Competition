@@ -21,13 +21,13 @@ class App {
   }
 
   mountDatabase() {
-    Database.Connection.sync({ force: true })
-      .then(() => {
-        console.log("DB Connected!");
-      })
-      .catch((err) => {
-        console.log("DB err : ", err);
-      });
+    // Database.Connection.sync({ force: true })
+    //   .then(() => {
+    //     console.log("DB Connected!");
+    //   })
+    //   .catch((err) => {
+    //     console.log("DB err : ", err);
+    //   });
   }
 
   /**

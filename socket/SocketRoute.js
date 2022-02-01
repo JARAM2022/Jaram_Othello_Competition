@@ -21,16 +21,18 @@ io.of("/").on(ServerEvents.CONNECTION, (socket) => {
   /* Socket joined */
   log.info(`User[${socket.id}] Connected at /`);
   socket.join("robby");
-  SocketController.getRoomInfo(io, socket);
+  SocketController.updateRoomList_solo(io, socket);
 
   /* Socket disconnected */
-  socket.on(ServerEvents.DISCONNECT, () => SocketController.disconnect(socket));
+  socket.on(ServerEvents.DISCONNECT, () =>
+    SocketController.disconnect(io, socket)
+  );
 
   /**
    * handle Room
    */
   socket.on(ServerEvents.GETROOM, () =>
-    SocketController.getRoomInfo(io, socket)
+    SocketController.updateRoomList(io, socket)
   );
 
   socket.on(ServerEvents.CREATEROOM, () => SocketController.create(io, socket));

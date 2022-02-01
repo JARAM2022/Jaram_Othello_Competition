@@ -13,20 +13,24 @@ class SocketController {
    * User Disconnected
    * @param {*} socket
    */
-  disconnect(socket) {
-    log.info(`User[${socket.id}] Disconnected`);
-  }
+  disconnect(io, socket) {
+    let room_id = RoomController.quitUser(socket.id) || "robby";
+    if (room_id != "robby") {
+      io.in(room_id).emit(ClientEvents.COMMAND, {
+        command: ClientEvents.QUITUSER,
+        socket_id: socket.id,
+      });
+      this.updateRoomList(io, socket);
 
-  /**
-   * Spread Room List in robby
-   * @param {*} io
-   * @param {*} socket
-   */
-  getRoomInfo(io, socket) {
-    socket.emit(ClientEvents.COMMAND, {
-      command: ClientEvents.GETROOM,
-      room_list: RoomController.getRoomList(),
-    });
+      if (RoomController.isRoomExist(room_id)) {
+        io.in(room_id).emit(ClientEvents.COMMAND, {
+          command: ClientEvents.ROOMINFO,
+          room_info: RoomController.getRoomInfo(room_id),
+          game_info: GameController.getGameInfo(room_id),
+        });
+      }
+    }
+    log.info(`User[${socket.id}] Disconnected from Room[${room_id}]`);
   }
 
   /**
@@ -44,12 +48,13 @@ class SocketController {
     RoomController.add(room_id);
     RoomController.setSpectator(room_id, socket.id); // T/F
     RoomController.setPlayer(room_id, socket.id); // T/F
+    GameController.add(room_id);
+
+    // update local RoomInfo
+    this.updateRoomInfo(io, socket);
 
     // broadcast Room List to all
-    io.in("robby").emit(ClientEvents.COMMAND, {
-      command: ClientEvents.GETROOM,
-      room_list: RoomController.getRoomList(),
-    });
+    this.updateRoomList(io, socket);
   }
 
   /**
@@ -63,11 +68,17 @@ class SocketController {
       log.error(`User[${socket.id}] Join Room Failed`);
       return; // TODO: emit Error
     }
+    let room_id = info.room_id;
 
-    if (RoomController.setSpectator(info.room_id, socket.id)) {
-      log.info(`User[${socket.id}] Joined Room[${info.room_id}]`);
+    if (RoomController.setSpectator(room_id, socket.id)) {
+      log.info(`User[${socket.id}] Joined Room[${room_id}]`);
+
       socket.leave("robby");
-      socket.join(info.room_id);
+      socket.join(room_id);
+
+      RoomController.setPlayer(room_id, socket.id); // T/F auto join as player if room less than 2
+
+      this.updateRoomInfo(io, socket); // update local RoomInfo
     }
   }
 
@@ -78,16 +89,18 @@ class SocketController {
    */
   ready(io, socket) {
     let room_id = this.getRoomId(socket);
+    // if (!RoomController.isReady(room_id)) {
+    //   log.error(`User[${socket.id}] Ready Failed Room[${room_id}] is playing`);
+    //   return;
+    // }
     RoomController.setReady(room_id, socket.id);
 
     if (RoomController.isReady(room_id)) {
       RoomController.setStatus(room_id, "playing");
-      GameController.add(room_id, RoomController.getPlayer(room_id));
-      io.in(room_id).emit(ClientEvents.COMMAND, {
-        command: ClientEvents.TURN,
-        turn: GameController.getTurn(room_id),
-      });
+      GameController.set(room_id, RoomController.getPlayer(room_id));
     }
+
+    this.updateRoomInfo(io, socket);
   }
 
   /**
@@ -107,17 +120,56 @@ class SocketController {
       GameController.getTurn(room_id) === socket.id &&
       GameController.putStone(room_id, info.x, info.y)
     ) {
-      io.in(room_id).emit(ClientEvents.COMMAND, {
-        command: ClientEvents.putStone,
-        user: socket.id,
-        x: info.x,
-        y: info.y,
-      });
-      io.in(room_id).emit(ClientEvents.COMMAND, {
-        command: ClientEvents.turn,
-        turn: GameController.nextTurn(room_id),
-      });
+      this.updateRoomInfo(io, socket);
+      // io.in(room_id).emit(ClientEvents.COMMAND, {
+      //   command: ClientEvents.PUTSTONE,
+      //   user: socket.id,
+      //   x: info.x,
+      //   y: info.y,
+      // });
+      // io.in(room_id).emit(ClientEvents.COMMAND, {
+      //   command: ClientEvents.TURN,
+      //   turn: GameController.nextTurn(room_id),
+      // });
     }
+  }
+
+  /**
+   * Update Room List in robby for request
+   * @param {*} io
+   * @param {*} socket
+   */
+  updateRoomList_solo(io, socket) {
+    socket.emit(ClientEvents.COMMAND, {
+      command: ClientEvents.UPDATEROOM,
+      room_list: RoomController.getRoomList(),
+    });
+  }
+
+  /**
+   * Update Room List in robby
+   * @param {*} io
+   * @param {*} socket
+   */
+  updateRoomList(io, socket) {
+    io.in("robby").emit(ClientEvents.COMMAND, {
+      command: ClientEvents.UPDATEROOM,
+      room_list: RoomController.getRoomList(),
+    });
+  }
+
+  /**
+   * Update Room Info in Specific Room
+   * @param {*} io
+   * @param {*} socket
+   */
+  updateRoomInfo(io, socket) {
+    let room_id = this.getRoomId(socket);
+    io.in(room_id).emit(ClientEvents.COMMAND, {
+      command: ClientEvents.ROOMINFO,
+      room_info: RoomController.getRoomInfo(room_id),
+      game_info: GameController.getGameInfo(room_id),
+    });
   }
 
   /**
@@ -132,6 +184,7 @@ class SocketController {
       this.ready(io, socket);
     }
   }
+
   /**
    * Util : AutoCreate
    */
@@ -146,7 +199,7 @@ class SocketController {
    */
   getRoomId(socket) {
     let temp = socket.rooms.values();
-    temp.next();
+    temp.next(); // socket.id
     return temp.next().value;
   }
 

@@ -5,18 +5,40 @@ class GameController {
    * room_id {
    *        player : [socket.id,socket.id],
    *        turn: socket.id,
-   *        board: [19x19] // default:-1
+   *        board: [8x8] // default:-1
    * }
    */
   _game = new Map();
 
-  add(room_id, player) {
+  add(room_id) {
     log.info(`Created Game[${room_id}]`);
+    this._game.set(room_id, {
+      player: [],
+      turn: -1,
+      board: Array(8).fill(Array(8).fill(-1)), // arr[19][19] fill with -1
+    });
+  }
+
+  set(room_id, player) {
+    log.info(`Setted Game[${room_id}]`);
     this._game.set(room_id, {
       player: player,
       turn: player[Math.floor(Math.random() * 2)],
-      board: Array(19).fill(Array(19).fill(-1)), // arr[19][19] fill with -1
+      board: Array(8).fill(Array(8).fill(-1)), // arr[19][19] fill with -1
     });
+  }
+
+  getGameInfo(room_id) {
+    if (!this._game.has(room_id)) {
+      log.error(`Game[${room_id}] Not Found Or Not Started`);
+      return { room_id: null, player: null, turn: null, board: null };
+    }
+    return {
+      room_id: room_id,
+      player: this._game.get(room_id)["player"],
+      turn: this._game.get(room_id)["turn"],
+      board: this._game.get(room_id)["board"],
+    };
   }
 
   getTurn(room_id) {
@@ -44,16 +66,16 @@ class GameController {
         this._game.get(room_id)["turn"]
       }`
     );
-    let m_game = this._game.get(room_id); // modified game
-    m_game["board"][x][y] = m_game["player"].indexOf(m_game["turn"]); // 0 or 1
-    this._game.set(room_id, m_game);
+    this._game.get(room_id)["board"][x][y] = this._game
+      .get(room_id)
+      ["player"].indexOf(this._game.get(room_id)["turn"]); // 0 or 1
     return true;
   }
 
   nextTurn(room_id) {
-    let m_game = this._game.get(room_id); // modified game
-    m_game["turn"] = !m_game["player"].indexOf(m_game["turn"]);
-    this._game.set(room_id, m_game);
+    this._game.get(room_id)["turn"] = !this._game
+      .get(room_id)
+      ["player"].indexOf(this._game.get(room_id)["turn"]);
     return m_game["turn"];
   }
 }
