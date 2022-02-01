@@ -1,5 +1,17 @@
 import log from "../logger.js";
 
+function createArray(length) {
+  var arr = new Array(length || 0),
+    i = length;
+
+  if (arguments.length > 1) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    while (i--) arr[length - 1 - i] = createArray.apply(this, args);
+  }
+
+  return arr;
+}
+
 class GameController {
   /**
    * room_id {
@@ -15,7 +27,9 @@ class GameController {
     this._game.set(room_id, {
       player: [],
       turn: -1,
-      board: Array(8).fill(Array(8).fill(-1)), // arr[19][19] fill with -1
+      board: Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(-1)), // arr[8][8] fill with -1
     });
   }
 
@@ -24,7 +38,9 @@ class GameController {
     this._game.set(room_id, {
       player: player,
       turn: player[Math.floor(Math.random() * 2)],
-      board: Array(8).fill(Array(8).fill(-1)), // arr[19][19] fill with -1
+      board: Array(8)
+        .fill(null)
+        .map(() => Array(8).fill(-1)), // arr[19][19] fill with -1
     });
   }
 
@@ -69,14 +85,21 @@ class GameController {
     this._game.get(room_id)["board"][x][y] = this._game
       .get(room_id)
       ["player"].indexOf(this._game.get(room_id)["turn"]); // 0 or 1
+    this.nextTurn(room_id);
     return true;
   }
 
   nextTurn(room_id) {
-    this._game.get(room_id)["turn"] = !this._game
-      .get(room_id)
-      ["player"].indexOf(this._game.get(room_id)["turn"]);
-    return m_game["turn"];
+    this._game.get(room_id)["turn"] =
+      this._game.get(room_id)["player"][
+        (this._game
+          .get(room_id)
+          ["player"].indexOf(this._game.get(room_id)["turn"]) +
+          1) %
+          2
+      ];
+
+    return this._game.get(room_id)["turn"];
   }
 }
 

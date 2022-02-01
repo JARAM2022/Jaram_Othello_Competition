@@ -116,22 +116,21 @@ class SocketController {
     }
 
     let room_id = this.getRoomId(socket);
-    if (
-      GameController.getTurn(room_id) === socket.id &&
-      GameController.putStone(room_id, info.x, info.y)
-    ) {
-      this.updateRoomInfo(io, socket);
-      // io.in(room_id).emit(ClientEvents.COMMAND, {
-      //   command: ClientEvents.PUTSTONE,
-      //   user: socket.id,
-      //   x: info.x,
-      //   y: info.y,
-      // });
-      // io.in(room_id).emit(ClientEvents.COMMAND, {
-      //   command: ClientEvents.TURN,
-      //   turn: GameController.nextTurn(room_id),
-      // });
+    if (GameController.getTurn(room_id) === socket.id) {
+      if (GameController.putStone(room_id, info.x, info.y)) {
+        this.updateRoomInfo(io, socket);
+      }
     }
+    // io.in(room_id).emit(ClientEvents.COMMAND, {
+    //   command: ClientEvents.PUTSTONE,
+    //   user: socket.id,
+    //   x: info.x,
+    //   y: info.y,
+    // });
+    // io.in(room_id).emit(ClientEvents.COMMAND, {
+    //   command: ClientEvents.TURN,
+    //   turn: GameController.nextTurn(room_id),
+    // });
   }
 
   /**
