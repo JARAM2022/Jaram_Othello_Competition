@@ -40,6 +40,24 @@ function ternaryToBoard(num){
   return res;
 }
 
+function copyBoard(board){
+  let res = Array(8)
+  .fill(null)
+  .map(() => Array(8).fill(-1));
+  for(var i = 0; i<8; i ++){
+    for(var j = 0; j<8; j ++){
+      res[i][j] = board[i][j];
+    }
+  }
+  return res;
+}
+
+function boardToLog(board){
+  for(let i = 0; i< 8 ; i++){
+      console.log(board[i][0]+1,board[i][1]+1,board[i][2]+1,board[i][3]+1,board[i][4]+1,board[i][5]+1,board[i][6]+1,board[i][7]+1);
+  }
+}
+
 // console.log(ternaryToBoard(984971066491994656644n));
 
 
@@ -76,7 +94,7 @@ function updateGameCase(key, value){
   //     console.log('Data written to file');
   //   });
   //   caseCount = 0;
-  // }
+  // } 
 }
 
 
@@ -171,14 +189,18 @@ class GameController {
     );
 
     let next_data = BigInt(this._game.get(room_id)["placeable"][2][index]);
+    
 
     this._game.get(room_id)["board"] = ternaryToBoard(next_data);
+
+    console.log(boardToLog(this._game.get(room_id)["board"]));
 
     // this._game.get(room_id)["board"][x][y] = this._game
     //   .get(room_id)
     //   ["player"].indexOf(this._game.get(room_id)["turn"]); // 0 or 1
 
     this.nextTurn(room_id,next_data);
+    console.log(boardToLog(this._game.get(room_id)["board"]));
     return true;
   }
 
@@ -193,7 +215,7 @@ class GameController {
 
 
     let data = [false, 0n];
-    let board = this._game.get(room_id)["board"];
+    let board = copyBoard(this._game.get(room_id)["board"]);
     // console.log(board);
     if((board[x_check][y_check] != -1) || !this.isOnBoard(x_check, y_check)){
       return data;
@@ -243,6 +265,7 @@ class GameController {
       for(let i = 0; i < tiles_to_flip.length; i++){
         board[tiles_to_flip[i][0]][tiles_to_flip[i][1]] = next_index;
       }
+      board[x_check][y_check] = next_index;
       data[1] = boardToTernary(board);
     }
     return data;
@@ -279,7 +302,7 @@ class GameController {
           let valid_data = this.isValidPlace(room_id,current_index,next_index, x, y);
           if(valid_data[0]){
             data[0].push([x,y]);
-            console.log(valid_data[1]);
+            // console.log(valid_data[1]);
             data[2].push(valid_data[1]);
           }
         }
@@ -320,7 +343,7 @@ class GameController {
     //       2
     //   ];
 
-    console.log(this._game.get(room_id)["board"]);
+    // console.log(this._game.get(room_id)["board"]);
 
     return this._game.get(room_id)["turn"];
   }
