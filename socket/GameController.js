@@ -43,6 +43,7 @@ function ternaryToBoard(num){
 
 
 
+
 let gameCase = require('../data/GameCase.json');
 // let caseCount = 0;
 
@@ -55,6 +56,7 @@ let gameCase = require('../data/GameCase.json');
 //       dat = JSON.parse(data);
 //   }});
 // }
+
 
 function updateGameCase(key, value){
   gameCase[key] = value;
@@ -109,8 +111,9 @@ class GameController {
       board: Array(8)
         .fill(null)
         .map(() => Array(8).fill(-1)), // arr[19][19] fill with -1
-      placeable: gameCase["350258943680422884n"],
+      placeable: gameCase[String(350258943680422884n)],
     });
+    console.log(this._game.get(room_id)["placeable"]);
   }
 ////////////
   initializeStone(room_id){
@@ -135,6 +138,7 @@ class GameController {
       board: this._game.get(room_id)["board"],
       placeable: this._game.get(room_id)["placeable"],
     };
+    
   }
 
   getTurn(room_id) {
