@@ -98,6 +98,7 @@ class SocketController {
     if (RoomController.isReady(room_id)) {
       RoomController.setStatus(room_id, "playing");
       GameController.set(room_id, RoomController.getPlayer(room_id));
+      GameController.initializeStone(room_id);
     }
 
     this.updateRoomInfo(io, socket);
@@ -110,14 +111,14 @@ class SocketController {
    * @param {*} info {x,y}
    */
   putStone(io, socket, info) {
-    if (!info.x | !info.y) {
+    if (!info.index) {
       log.error(`User[${socket.id}] putStone Failed`);
       return; // TODO: emit Error
     }
 
     let room_id = this.getRoomId(socket);
     if (GameController.getTurn(room_id) === socket.id) {
-      if (GameController.putStone(room_id, info.x, info.y)) {
+      if (GameController.putStone(room_id, info.index)) {
         this.updateRoomInfo(io, socket);
       }
     }

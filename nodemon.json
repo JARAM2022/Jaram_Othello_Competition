@@ -1,0 +1,4 @@
+{
+  "exec": "babel-node index.js",
+  "ignore": ["data/"]
+}
