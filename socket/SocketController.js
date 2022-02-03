@@ -111,7 +111,8 @@ class SocketController {
    * @param {*} info {x,y}
    */
   putStone(io, socket, info) {
-    if (!info.index) {
+    console.log(info);
+    if (info.index < 0) {
       log.error(`User[${socket.id}] putStone Failed`);
       return; // TODO: emit Error
     }

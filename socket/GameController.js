@@ -10,7 +10,6 @@ function createArray(length) {
     var args = Array.prototype.slice.call(arguments, 1);
     while (i--) arr[length - 1 - i] = createArray.apply(this, args);
   }
-
   return arr;
 }
 
@@ -41,7 +40,7 @@ function ternaryToBoard(num){
   return res;
 }
 
-
+// console.log(ternaryToBoard(984971066491994656644n));
 
 
 let gameCase = require('../data/GameCase.json');
@@ -56,11 +55,15 @@ let gameCase = require('../data/GameCase.json');
 //       dat = JSON.parse(data);
 //   }});
 // }
+// console.log(gameCase);
 
 
 function updateGameCase(key, value){
-  gameCase[key] = value;
+  gameCase[String(key)] = value;
   // console.log(jsonData);
+  for(let i = 0; i<value[2].length;i++){
+    gameCase[String(key)][2][i] = String(gameCase[String(key)][2][i]);
+  }
   let json = JSON.stringify(gameCase);
   fs.writeFile(path.resolve(__dirname, '../data/GameCase.json'), json, 'utf8', (err) => {
     if (err) throw err;
@@ -113,7 +116,7 @@ class GameController {
         .map(() => Array(8).fill(-1)), // arr[19][19] fill with -1
       placeable: gameCase[String(350258943680422884n)],
     });
-    console.log(this._game.get(room_id)["placeable"]);
+    // console.log(this._game.get(room_id)["placeable"]);
   }
 ////////////
   initializeStone(room_id){
@@ -175,7 +178,7 @@ class GameController {
     //   .get(room_id)
     //   ["player"].indexOf(this._game.get(room_id)["turn"]); // 0 or 1
 
-    this.nextTurn(room_id);
+    this.nextTurn(room_id,next_data);
     return true;
   }
 
@@ -184,27 +187,35 @@ class GameController {
   }
 
   isValidPlace(room_id,next_index,current_index, x_check, y_check){
+    // console.log("isvalidplace");
+    // console.log(room_id, next_index, current_index, x_check, y_check);
+
+
+
     let data = [false, 0n];
     let board = this._game.get(room_id)["board"];
+    // console.log(board);
     if((board[x_check][y_check] != -1) || !this.isOnBoard(x_check, y_check)){
       return data;
     }
     let tiles_to_flip = [];
-    let direction = [[0, 1], [1, 1], [1, 0], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]];
+    let direction = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]];
 
     for(let i = 0; i<8; i++){
       let x = x_check;
       let y = y_check;
       x += direction[i][0];
       y += direction[i][1];
-      if (board[x][y] == current_index){
+      // console.log(board);
+      // console.log(`x ${x} y ${y}`);
+      if (this.isOnBoard(x,y) && (board[x][y] === current_index)){
         x += direction[i][0];
         y += direction[i][1];
         if (!this.isOnBoard(x, y)){
           continue;
         }
             
-        while(board[x][y] == current_index){
+        while(board[x][y] === current_index){
           x += direction[i][0];
           y += direction[i][1];
           if (!this.isOnBoard(x, y)){
@@ -214,11 +225,11 @@ class GameController {
         if (!this.isOnBoard(x, y)){
           continue;
         }
-        if (board[x][y] == next_index){
+        if (board[x][y] === next_index){
           while(true){
             x -= direction[i][0];
             y -= direction[i][1];
-            if (x == x_check && y == y_check){
+            if (x === x_check && y === y_check){
               break;
             }
             tiles_to_flip.push([x, y]);
@@ -238,18 +249,16 @@ class GameController {
   }
 
   calculatePlaceable(room_id, current_index, ternary_board){
+    // console.log("calculatePLaceable");
+    // console.log(room_id, current_index, ternary_board);
     let next_index = (current_index + 1)%2;
     let data = [[],[0,0],[],next_index];
 
     for(let x = 0; x < 8; x++){
       for(let y = 0; y < 8; y++){
         let stone = this._game.get(room_id)["board"][x][y];
-        if(stone === 0){
-          data[1][0]++;
-        }
-        if(stone === 1){
-          data[1][1]++;
-        }
+        if(stone === 0)data[1][0]++;
+        if(stone === 1)data[1][1]++;
       }
     }
     
@@ -270,6 +279,7 @@ class GameController {
           let valid_data = this.isValidPlace(room_id,current_index,next_index, x, y);
           if(valid_data[0]){
             data[0].push([x,y]);
+            console.log(valid_data[1]);
             data[2].push(valid_data[1]);
           }
         }
@@ -286,8 +296,9 @@ class GameController {
   }
 
   nextTurn(room_id, next_data) {
+    // console.log(this._game.get(room_id)["placeable"]);
     if(!(gameCase.hasOwnProperty(String(next_data)))){
-      this.calculatePlaceable(room_id, next_data, this._game.get(room_id)["placeable"][3],next_data);
+      this.calculatePlaceable(room_id, this._game.get(room_id)["placeable"][3],next_data);
     }
 
     this._game.get(room_id)["placeable"] = gameCase[String(next_data)];
@@ -308,6 +319,8 @@ class GameController {
     //       1) %
     //       2
     //   ];
+
+    console.log(this._game.get(room_id)["board"]);
 
     return this._game.get(room_id)["turn"];
   }
