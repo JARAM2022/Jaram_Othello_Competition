@@ -135,6 +135,13 @@ class SocketController {
     // });
   }
 
+  send_socket_id(io, socket){
+    socket.emit(ClientEvents.COMMAND, {
+      command: ClientEvents.SENDID,
+      socket_id: socket.id,
+    });
+  }
+
   /**
    * Update Room List in robby for request
    * @param {*} io
@@ -145,6 +152,7 @@ class SocketController {
       command: ClientEvents.UPDATEROOM,
       room_list: RoomController.getRoomList(),
     });
+    this.send_socket_id(io, socket);
   }
 
   /**

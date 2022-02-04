@@ -51,12 +51,18 @@ io.of("/").on(ServerEvents.CONNECTION, (socket) => {
     SocketController.autoCreate(io, socket)
   );
 
+  socket.on(ServerEvents.GETID, () =>
+  SocketController.send_socket_id(io, socket)
+);
+
   /**
    * handle Game
    */
   socket.on(GameEvents.PUTSTONE, (info) => {
     SocketController.putStone(io, socket, info);
   });
+
+
 });
 
 export default io;

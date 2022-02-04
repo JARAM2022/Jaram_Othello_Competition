@@ -7,4 +7,5 @@ export default {
   READY: "ready",
   AUTOJOIN: "auto_join",
   AUTOCREATE: "auto_create",
+  GETID: "get_id",
 };

@@ -7,4 +7,5 @@ export default {
   GAME: "game",
   PUTSTONE: "put_stone",
   TURN: "turn",
+  SENDID: "send_id",
 };
