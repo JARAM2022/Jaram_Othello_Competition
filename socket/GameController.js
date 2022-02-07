@@ -181,7 +181,6 @@ class GameController {
     //   log.error(`Game[${room_id}] Board[${x},${y}] is already placed!`);
     //   return false;
     // }
-
     log.info(
       `Game[${room_id}] Board[${this._game.get(room_id)["placeable"][0][index][0]},${this._game.get(room_id)["placeable"][0][index][1]}] is placed by ${
         this._game.get(room_id)["turn"]
@@ -193,15 +192,13 @@ class GameController {
 
     this._game.get(room_id)["board"] = ternaryToBoard(next_data);
 
-    console.log(boardToLog(this._game.get(room_id)["board"]));
+    // console.log(boardToLog(this._game.get(room_id)["board"]));
 
     // this._game.get(room_id)["board"][x][y] = this._game
     //   .get(room_id)
     //   ["player"].indexOf(this._game.get(room_id)["turn"]); // 0 or 1
 
-    this.nextTurn(room_id,next_data);
-    console.log(boardToLog(this._game.get(room_id)["board"]));
-    return true;
+    return this.nextTurn(room_id,next_data)
   }
 
   isOnBoard(x,y){
@@ -344,7 +341,6 @@ class GameController {
     //   ];
 
     // console.log(this._game.get(room_id)["board"]);
-
     return this._game.get(room_id)["turn"];
   }
 }
