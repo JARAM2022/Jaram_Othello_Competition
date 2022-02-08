@@ -47,7 +47,7 @@ class RoomController {
         flag = false;
       }
 
-      if (player.size + spectator.size === 0 || ((player.size + spectator.size) === 1 && player.has(TEST_AI))) this._room.delete(room_id);
+      if (player.size + spectator.size === 0 || ((player.size + spectator.size) === 1 && player.has("TEST_AI"))) this._room.delete(room_id);
 
       if (flag) {
         if (room_status == "playing") {
