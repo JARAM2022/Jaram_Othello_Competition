@@ -8,6 +8,8 @@ import GameController from "./GameController.js";
 import ClientEvents from "./constants/ClientEvents.js";
 import AppConfig from "../configs/AppConfig.js";
 
+const AI_PREFIX = "<Test_AI>";
+
 class SocketController {
   /**
    * User Disconnected
@@ -111,35 +113,44 @@ class SocketController {
    * @param {*} info {x,y}
    */
   putStone(io, socket, info) {
-    console.log(info);
     if (info.index < 0) {
-      log.error(`User[${socket.id}] putStone Failed`);
+      log.error(`User[${socket.id}] putStone Failed : no index`);
       return; // TODO: emit Error
     }
 
     let room_id = this.getRoomId(socket);
-    if (GameController.getTurn(room_id) === socket.id) {
-      let msg = GameController.putStone(room_id, info.index)
-      if (msg === "success") {
-        this.updateRoomInfo(io, socket);
-      }
-      else if(msg === "end" ){
-        this.updateRoomInfo(io, socket);
-        // let room_id = this.getRoomId(socket);
-        // RoomController.initializePLayer(room_id)
-        // this.updateRoomInfo(io, socket);
+    if (GameController.getTurn(room_id) !== socket.id) {
+      log.error(`User[${socket.id}] putStone Failed : invalid turn`);
+      return; // TODO: emit Error
+    }
+
+    let put_stone = GameController.putStone(room_id, info.index);
+    log.info(put_stone);
+
+    if (put_stone === false) {
+      log.error(`User[${socket.id}] putStone Failed : invalid index`);
+      return; // TODO: emit Error
+    } else if (put_stone === "-1") {
+      // game over
+      RoomController.setStatus(room_id, "GameOver");
+      return;
+    } 
+
+    if (room_id.startsWith(AI_PREFIX)){
+      let ai_info = GameController.getGameInfo(room_id);
+      console.log(ai_info["placeable"])
+      while (ai_info["placeable"].length > 0 && ai_info["turn"] === "TEST_AI"){
+        /**
+         *  ServerAI
+         **/ 
+        // random algorithm
+        // 
+        GameController.putStone(room_id, Math.floor(Math.random() * ai_info["placeable"][0].length));
+        ai_info = GameController.getGameInfo(room_id);
       }
     }
-    // io.in(room_id).emit(ClientEvents.COMMAND, {
-    //   command: ClientEvents.PUTSTONE,
-    //   user: socket.id,
-    //   x: info.x,
-    //   y: info.y,
-    // });
-    // io.in(room_id).emit(ClientEvents.COMMAND, {
-    //   command: ClientEvents.TURN,
-    //   turn: GameController.nextTurn(room_id),
-    // });
+
+    this.updateRoomInfo(io, socket);
   }
 
   send_socket_id(io, socket){
@@ -219,6 +230,50 @@ class SocketController {
     return temp.next().value;
   }
 
+
+  /**
+   * Test AI handler 
+   */
+
+  joinAI(io,socket){
+    // for (let i = 0; i < 5 ; i++) {
+    //   let room_id = AI_PREFIX + crypto.randomBytes(4).toString("hex");
+    //   RoomController.add(room_id);
+    //   RoomController.setSpectator(room_id, socket.id); // T/F
+    //   RoomController.setPlayer(room_id, socket.id); // T/F
+    //   GameController.add(room_id);
+    // }
+ 
+      let room_id = AI_PREFIX + crypto.randomBytes(4).toString("hex");
+  
+      socket.leave("robby");
+      socket.join(room_id);
+  
+      // Spread Created Room
+      RoomController.add(room_id);
+      RoomController.setSpectator(room_id, socket.id); // T/F
+      RoomController.setPlayer(room_id, socket.id); // T/F
+
+      RoomController.setSpectator(room_id, "TEST_AI"); // T/F
+      RoomController.setPlayer(room_id, "TEST_AI"); // T/F
+      RoomController.setReady(room_id, "TEST_AI");
+
+      GameController.add(room_id);
+
+      // console.log(GameController.getGameInfo(room_id))
+      // let ai_info = GameController.getGameInfo(room_id).placeable;
+      // if (ai_info.length > 0){
+      //   let ai_index = ai_info[Math.floor(Math.random() * ai_info.length)];
+      //   GameController.putStone(room_id, ai_index);
+      // }
+
+  
+      // update local RoomInfo
+      this.updateRoomInfo(io, socket);
+  
+      // broadcast Room List to all
+      this.updateRoomList(io, socket);
+  }
   /**
    * Automation of Room cases
    */
@@ -233,7 +288,7 @@ class SocketController {
       "Test Room Created : " + JSON.stringify(RoomController.get(room_id))
     );
     /***** TEST SCRIPT END ******/
-  }
+    }
 }
 
 export default new SocketController();

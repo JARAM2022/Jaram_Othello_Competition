@@ -191,7 +191,7 @@ class GameController {
   putStone(room_id, index) {
     if (!this._game.has(room_id)) {
       log.error(`Game[${room_id}] Not Found`);
-      return "err";
+      return false;
     }
 
     // if (this._game.get(room_id)["board"][x][y] !== -1) {
@@ -210,15 +210,13 @@ class GameController {
   
       this._game.get(room_id)["board"] = ternaryToBoard(next_data);
 
-      if(this.nextTurn(room_id,next_data) === -1){
-        return "end";
-      }
+      return this.nextTurn(room_id,next_data)
       
     }
     else{
-      return "err";
+      return false;
     }
-    return "success";
+
     
   }
 
@@ -364,7 +362,6 @@ class GameController {
     //   ];
 
     // console.log(this._game.get(room_id)["board"]);
-
     return this._game.get(room_id)["turn"];
   }
 }

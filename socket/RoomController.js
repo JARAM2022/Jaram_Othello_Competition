@@ -28,8 +28,6 @@ class RoomController {
       log.error(`Room[${room_id}] Not Found`);
       return false;
     }
-    console.log(room_id);
-    console.log(this._room.get(room_id));
     return {
       room_id: room_id,
       room_status: this._room.get(room_id)["room_status"],
@@ -56,7 +54,6 @@ class RoomController {
           //TODO : lose game
           log.info("TODO : lose game");
         } else if (room_status === "waiting" && spectator.size > 0) {
-          console.log("asd");
           this.setPlayer(room_id, spectator.values().next().value);
         }
 

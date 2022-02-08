@@ -41,6 +41,10 @@ io.of("/").on(ServerEvents.CONNECTION, (socket) => {
     SocketController.join(io, socket, info)
   );
 
+  socket.on(ServerEvents.JOINAI, (info) =>
+    SocketController.joinAI(io, socket, info)
+  );
+
   socket.on(ServerEvents.READY, (info) =>
     SocketController.ready(io, socket, info)
   );
@@ -52,8 +56,8 @@ io.of("/").on(ServerEvents.CONNECTION, (socket) => {
   );
 
   socket.on(ServerEvents.GETID, () =>
-  SocketController.send_socket_id(io, socket)
-);
+    SocketController.send_socket_id(io, socket)
+  );
 
   /**
    * handle Game

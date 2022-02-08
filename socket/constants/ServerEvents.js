@@ -3,6 +3,7 @@ export default {
   DISCONNECT: "disconnect",
   GETROOM: "get_room",
   JOINROOM: "join_room",
+  JOINAI: "join_ai",
   CREATEROOM: "create_room",
   READY: "ready",
   AUTOJOIN: "auto_join",
