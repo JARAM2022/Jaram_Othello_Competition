@@ -1,6 +1,11 @@
 import log from "../logger.js";
 import fs from 'fs';
 import path from 'path';
+import { createRequire } from "module";
+import { fileURLToPath } from 'url';
+const require = createRequire(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function createArray(length) {
   var arr = new Array(length || 0),
@@ -32,13 +37,18 @@ function ternaryToBoard(num){
   .map(() => Array(8).fill(-1));
   for(var i = 0; i<8; i ++){
     for(var j = 0; j<8; j ++){
+      // console.log(divTemp, temp);
       res[i][j] = parseInt(temp / divTemp) - 1;
       temp = (temp % divTemp);
       divTemp /= 3n;
+      // console.log(divTemp, temp, res[i][j]);
+      // console.log();
     }
   }
   return res;
 }
+
+
 
 function copyBoard(board){
   let res = Array(8)
@@ -58,10 +68,13 @@ function boardToLog(board){
   }
 }
 
-// console.log(ternaryToBoard(984971066491994656644n));
-
-
-let gameCase = require('../data/GameCase.json');
+var gameCase;
+try{
+  gameCase = require('../data/GameCase.json');
+}catch (err){
+  console.log(err);
+  gameCase = require('../data/GameCaseSaved.json');
+}
 // let caseCount = 0;
 
 // function readGameCase(){
@@ -83,10 +96,14 @@ function updateGameCase(key, value){
     gameCase[String(key)][2][i] = String(gameCase[String(key)][2][i]);
   }
   let json = JSON.stringify(gameCase);
-  fs.writeFile(path.resolve(__dirname, '../data/GameCase.json'), json, 'utf8', (err) => {
-    if (err) throw err;
-    console.log('Data written to file');
-  });
+  try{
+    fs.writeFile(path.resolve(__dirname, '../data/GameCase.json'), json, 'utf8', (err) => {
+      if (err) throw err;
+      console.log('Data written to file');
+    });
+  }catch(err){
+    console.log(err);
+  }
   // caseCount++;
   // if (caseCount > 5){
   //   fs.writeFile(path.resolve(__dirname, '../data/GameCase.json'), json, 'utf8', (err) => {
@@ -174,31 +191,35 @@ class GameController {
   putStone(room_id, index) {
     if (!this._game.has(room_id)) {
       log.error(`Game[${room_id}] Not Found`);
-      return false;
+      return "err";
     }
 
     // if (this._game.get(room_id)["board"][x][y] !== -1) {
     //   log.error(`Game[${room_id}] Board[${x},${y}] is already placed!`);
     //   return false;
     // }
-    log.info(
-      `Game[${room_id}] Board[${this._game.get(room_id)["placeable"][0][index][0]},${this._game.get(room_id)["placeable"][0][index][1]}] is placed by ${
-        this._game.get(room_id)["turn"]
-      }`
-    );
+    if(this._game.get(room_id)["placeable"][0].length > index){
+      log.info(
+        `Game[${room_id}] Board[${this._game.get(room_id)["placeable"][0][index][0]},${this._game.get(room_id)["placeable"][0][index][1]}] is placed by ${
+          this._game.get(room_id)["turn"]
+        }`
+      );
+  
+      let next_data = BigInt(this._game.get(room_id)["placeable"][2][index]);
+      
+  
+      this._game.get(room_id)["board"] = ternaryToBoard(next_data);
 
-    let next_data = BigInt(this._game.get(room_id)["placeable"][2][index]);
+      if(this.nextTurn(room_id,next_data) === -1){
+        return "end";
+      }
+      
+    }
+    else{
+      return "err";
+    }
+    return "success";
     
-
-    this._game.get(room_id)["board"] = ternaryToBoard(next_data);
-
-    // console.log(boardToLog(this._game.get(room_id)["board"]));
-
-    // this._game.get(room_id)["board"][x][y] = this._game
-    //   .get(room_id)
-    //   ["player"].indexOf(this._game.get(room_id)["turn"]); // 0 or 1
-
-    return this.nextTurn(room_id,next_data)
   }
 
   isOnBoard(x,y){
@@ -323,12 +344,14 @@ class GameController {
 
     this._game.get(room_id)["placeable"] = gameCase[String(next_data)];
     this._game.get(room_id)["turn"] = this._game.get(room_id)["player"][this._game.get(room_id)["placeable"][3]];
+    console.log(this._game.get(room_id)["placeable"]);
 
 
     if(gameCase[String(next_data)][0].length === 0){
       log.info(
         `Game[${room_id}] Done Score[${gameCase[String(next_data)][1][0]},${gameCase[String(next_data)][1][1]}]`
       );
+      
       return -1
     };
     // this._game.get(room_id)["turn"] =
