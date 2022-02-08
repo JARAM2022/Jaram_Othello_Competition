@@ -140,20 +140,7 @@ class RoomController {
     return true;
   }
 
-  initializePLayer(room_id){
-    if (!this._room.has(room_id)) {
-      log.error(`Room[${room_id}] Not Found`);
-      return false;
-    }
-    if(this._room.get(room_id)["room_status"] === "playing"){
-      for(let i = 0; i<2; i++){
-        this._room.get(room_id)["player"].set(this._room.get(room_id)["player"][i], 0);
-      }
-      this._room.get(room_id)["room_status"] === "waiting";
-    }
-    return true;
-    
-  }
+  
 }
 
 export default new RoomController();
