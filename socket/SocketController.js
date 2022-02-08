@@ -143,7 +143,6 @@ class SocketController {
          *  ServerAI
          **/ 
         // random algorithm
-        // 
         GameController.putStone(room_id, Math.floor(Math.random() * ai_info["placeable"][0].length));
         ai_info = GameController.getGameInfo(room_id);
       }
@@ -235,14 +234,6 @@ class SocketController {
    */
 
   joinAI(io,socket){
-    // for (let i = 0; i < 5 ; i++) {
-    //   let room_id = AI_PREFIX + crypto.randomBytes(4).toString("hex");
-    //   RoomController.add(room_id);
-    //   RoomController.setSpectator(room_id, socket.id); // T/F
-    //   RoomController.setPlayer(room_id, socket.id); // T/F
-    //   GameController.add(room_id);
-    // }
- 
       let room_id = AI_PREFIX + crypto.randomBytes(4).toString("hex");
   
       socket.leave("robby");
@@ -258,14 +249,6 @@ class SocketController {
       RoomController.setReady(room_id, "TEST_AI");
 
       GameController.add(room_id);
-
-      // console.log(GameController.getGameInfo(room_id))
-      // let ai_info = GameController.getGameInfo(room_id).placeable;
-      // if (ai_info.length > 0){
-      //   let ai_index = ai_info[Math.floor(Math.random() * ai_info.length)];
-      //   GameController.putStone(room_id, ai_index);
-      // }
-
   
       // update local RoomInfo
       this.updateRoomInfo(io, socket);
