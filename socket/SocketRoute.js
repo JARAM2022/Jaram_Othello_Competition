@@ -8,8 +8,16 @@ import log from "../logger.js";
 import SocketController from "./SocketController.js";
 import ServerEvents from "./constants/ServerEvents.js";
 import GameEvents from "./constants/GameEvents.js";
+import AppConfig from "../configs/AppConfig.js";
 
-const io = new Server();
+const port = AppConfig.PORT || 3000;
+
+const io = new Server(port,{
+  cors:{
+    origin:"*",
+    methods:["GET","POST"],
+  }
+});
 
 // SocketController.test(); // testcase
 

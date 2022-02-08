@@ -1,3 +1,3 @@
-import server from "./server.js";
+import Socket from "./socket/SocketRoute.js";
 
-server;
+const app = Socket

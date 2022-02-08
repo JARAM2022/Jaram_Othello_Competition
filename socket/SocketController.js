@@ -1,5 +1,4 @@
 import crypto from "crypto";
-import jwt from "jsonwebtoken";
 import log from "../logger.js";
 
 import RoomController from "./RoomController.js";

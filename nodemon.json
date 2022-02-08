@@ -1,4 +1,0 @@
-{
-  "exec": "node index.js",
-  "ignore": ["data/"]
-}
