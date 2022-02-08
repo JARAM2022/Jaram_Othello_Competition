@@ -119,8 +119,15 @@ class SocketController {
 
     let room_id = this.getRoomId(socket);
     if (GameController.getTurn(room_id) === socket.id) {
-      if (GameController.putStone(room_id, info.index)) {
+      let msg = GameController.putStone(room_id, info.index)
+      if (msg === "success") {
         this.updateRoomInfo(io, socket);
+      }
+      else if(msg === "end" ){
+        this.updateRoomInfo(io, socket);
+        // let room_id = this.getRoomId(socket);
+        // RoomController.initializePLayer(room_id)
+        // this.updateRoomInfo(io, socket);
       }
     }
     // io.in(room_id).emit(ClientEvents.COMMAND, {

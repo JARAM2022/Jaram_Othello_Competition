@@ -5,24 +5,23 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "pm2:single": "pm2 start index.js",
+    "pm2:cluster": "pm2 start ecosystem.config.js",
     "dev:server": "nodemon -L"
   },
   "license": "MIT",
-  
+  "type": "module",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.2",
     "jsonwebtoken": "^8.5.1",
     "pg": "^8.7.1",
+    "pm2": "^5.1.2",
     "sequelize": "^6.13.0",
     "socket.io": "^4.4.1",
     "winston": "^3.4.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.15.0",
-    "@babel/node": "^7.14.9",
-    "@babel/preset-env": "^7.15.0",
-    "babel-loader": "^8.2.2",
     "css-loader": "^6.3.0",
     "mini-css-extract-plugin": "^2.3.0",
     "nodemon": "^2.0.12",
