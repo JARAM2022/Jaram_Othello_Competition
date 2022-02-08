@@ -119,16 +119,34 @@ class SocketController {
     }
 
     let room_id = this.getRoomId(socket);
-    if (GameController.getTurn(room_id) === socket.id) {
-      let msg = GameController.putStone(room_id, info.index)
-      if (msg === "success") {
-        this.updateRoomInfo(io, socket);
-      }
-      else if(msg === "end" ){
-        this.updateRoomInfo(io, socket);
-        // let room_id = this.getRoomId(socket);
-        // RoomController.initializePLayer(room_id)
-        // this.updateRoomInfo(io, socket);
+    if (GameController.getTurn(room_id) !== socket.id) {
+      log.error(`User[${socket.id}] putStone Failed : invalid turn`);
+      return; // TODO: emit Error
+    }
+
+    let put_stone = GameController.putStone(room_id, info.index);
+    log.info(put_stone);
+
+    if (put_stone === false) {
+      log.error(`User[${socket.id}] putStone Failed : invalid index`);
+      return; // TODO: emit Error
+    } else if (put_stone === "-1") {
+      // game over
+      RoomController.setStatus(room_id, "GameOver");
+      return;
+    } 
+
+    if (room_id.startsWith(AI_PREFIX)){
+      let ai_info = GameController.getGameInfo(room_id);
+      console.log(ai_info["placeable"])
+      while (ai_info["placeable"].length > 0 && ai_info["turn"] === "TEST_AI"){
+        /**
+         *  ServerAI
+         **/ 
+        // random algorithm
+        // 
+        GameController.putStone(room_id, Math.floor(Math.random() * ai_info["placeable"][0].length));
+        ai_info = GameController.getGameInfo(room_id);
       }
     }
 
