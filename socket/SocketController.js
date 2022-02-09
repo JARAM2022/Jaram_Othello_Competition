@@ -16,6 +16,7 @@ class SocketController {
    */
   disconnect(io, socket) {
     let room_id = RoomController.quitUser(socket.id) || "robby";
+
     if (room_id != "robby") {
       io.in(room_id).emit(ClientEvents.COMMAND, {
         command: ClientEvents.QUITUSER,
@@ -31,6 +32,7 @@ class SocketController {
         });
       }
     }
+
     log.info(`User[${socket.id}] Disconnected from Room[${room_id}]`);
   }
 
@@ -42,7 +44,14 @@ class SocketController {
   create(io, socket) {
     let room_id = crypto.randomBytes(4).toString("hex");
 
-    socket.leave("robby");
+    let user_room_id = this.getRoomId(socket)
+    if (user_room_id != "robby" ){
+      this.disconnect(io, socket);
+      socket.leave(user_room_id);
+    } else  {
+      socket.leave("robby");
+    }
+
     socket.join(room_id);
 
     // Spread Created Room
@@ -69,18 +78,61 @@ class SocketController {
       log.error(`User[${socket.id}] Join Room Failed`);
       return; // TODO: emit Error
     }
+
     let room_id = info.room_id;
 
     if (RoomController.setSpectator(room_id, socket.id)) {
       log.info(`User[${socket.id}] Joined Room[${room_id}]`);
 
-      socket.leave("robby");
+      let user_room_id = this.getRoomId(socket)
+      if (user_room_id != "robby" ){
+        this.disconnect(io, socket);
+        socket.leave(user_room_id);
+      } else  {
+        socket.leave("robby");
+      }
+
       socket.join(room_id);
 
       RoomController.setPlayer(room_id, socket.id); // T/F auto join as player if room less than 2
 
       this.updateRoomInfo(io, socket); // update local RoomInfo
     }
+  }
+
+    /**
+   * Test AI handler 
+   */
+
+    joinAI(io,socket){    
+      let room_id = AI_PREFIX + crypto.randomBytes(4).toString("hex");
+
+      let user_room_id = this.getRoomId(socket)
+      if (user_room_id != "robby" ){
+        this.disconnect(io, socket);
+        socket.leave(user_room_id);
+      } else  {
+        socket.leave("robby");
+      }
+  
+      socket.join(room_id);
+  
+      // Spread Created Room
+      RoomController.add(room_id);
+      RoomController.setSpectator(room_id, socket.id); // T/F
+      RoomController.setPlayer(room_id, socket.id); // T/F
+
+      RoomController.setSpectator(room_id, "TEST_AI"); // T/F
+      RoomController.setPlayer(room_id, "TEST_AI"); // T/F
+      RoomController.setReady(room_id, "TEST_AI");
+
+      GameController.add(room_id);
+  
+      // update local RoomInfo
+      this.updateRoomInfo(io, socket);
+  
+      // broadcast Room List to all
+      this.updateRoomList(io, socket);
   }
 
   /**
@@ -224,38 +276,11 @@ class SocketController {
    */
   getRoomId(socket) {
     let temp = socket.rooms.values();
+    console.log(socket.rooms.values())
     temp.next(); // socket.id
     return temp.next().value;
   }
 
-
-  /**
-   * Test AI handler 
-   */
-
-  joinAI(io,socket){
-      let room_id = AI_PREFIX + crypto.randomBytes(4).toString("hex");
-  
-      socket.leave("robby");
-      socket.join(room_id);
-  
-      // Spread Created Room
-      RoomController.add(room_id);
-      RoomController.setSpectator(room_id, socket.id); // T/F
-      RoomController.setPlayer(room_id, socket.id); // T/F
-
-      RoomController.setSpectator(room_id, "TEST_AI"); // T/F
-      RoomController.setPlayer(room_id, "TEST_AI"); // T/F
-      RoomController.setReady(room_id, "TEST_AI");
-
-      GameController.add(room_id);
-  
-      // update local RoomInfo
-      this.updateRoomInfo(io, socket);
-  
-      // broadcast Room List to all
-      this.updateRoomList(io, socket);
-  }
   /**
    * Automation of Room cases
    */
